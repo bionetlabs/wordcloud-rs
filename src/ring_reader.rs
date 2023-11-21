@@ -10,16 +10,19 @@ impl<E: Clone + Copy> RingReader<E> {
         Self {
             end: data.len(),
             data: data,
-            start: 0
+            start: 0,
         }
     }
 
     pub fn next(&mut self) -> Option<E> {
         if self.start == self.end {
-            return None
+            return None;
         }
         if self.start >= self.data.len() {
             self.start = 0;
+        }
+        if self.start == self.end {
+            return None;
         }
         let res = self.data[self.start];
         self.start += 1;
@@ -30,7 +33,7 @@ impl<E: Clone + Copy> RingReader<E> {
         self.end = if self.start == 0 {
             self.data.len()
         } else {
-            self.start-1
+            self.start - 1
         };
     }
 }
