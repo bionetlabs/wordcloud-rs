@@ -1,8 +1,11 @@
-use fontdue::{Font, layout::{Layout, CoordinateSystem, TextStyle}, Metrics};
-use image::{RgbaImage, GenericImage, Rgba, Pixel, GenericImageView};
+use super::{hxbitmap::HXBitmap, indexed_chars::IndexedChars, rasterisable::Rasterisable};
+use fontdue::{
+    layout::{CoordinateSystem, Layout, TextStyle},
+    Font, Metrics,
+};
+use image::{GenericImage, GenericImageView, Pixel, Rgba, RgbaImage};
 use itertools::enumerate;
-use super::{hxbitmap::{HXBitmap}, rasterisable::Rasterisable, indexed_chars::IndexedChars};
-use std::{iter::zip, fmt::Display};
+use std::{fmt::Display, iter::zip};
 
 pub struct Text {
     text: String,
@@ -17,8 +20,17 @@ impl Text {
         let mut layout = Layout::new(CoordinateSystem::PositiveYDown);
         layout.append(&fonts, &TextStyle::new(text.as_str(), size, 0));
         let indexed = IndexedChars::new(&text);
-        let glyphs: Vec<_> = indexed.chars.iter().map(|c| fonts[0].rasterize(*c, size)).collect();
-        Self { text, layout, glyphs, color }
+        let glyphs: Vec<_> = indexed
+            .chars
+            .iter()
+            .map(|c| fonts[0].rasterize(*c, size))
+            .collect();
+        Self {
+            text,
+            layout,
+            glyphs,
+            color,
+        }
     }
 }
 
@@ -27,10 +39,10 @@ fn compute_dim(layout: &Layout) -> (usize, usize) {
     for pos in layout.glyphs() {
         x1 = x1.min(pos.x as i32);
         y1 = y1.min(pos.y as i32);
-        x2 = x2.max(pos.x as i32+pos.width as i32);
-        y2 = y2.max(pos.y as i32+pos.height as i32);
+        x2 = x2.max(pos.x as i32 + pos.width as i32);
+        y2 = y2.max(pos.y as i32 + pos.height as i32);
     }
-    return (1+(x2-x1) as usize, (y2-y1) as usize)
+    return (1 + (x2 - x1) as usize, (y2 - y1) as usize);
 }
 
 impl Display for Text {
@@ -58,7 +70,7 @@ impl Rasterisable for Text {
                 let dx = (i % metrics.width) as u32;
                 let dy = (i / metrics.width) as u32;
                 let mut color = self.color.clone();
-                color.0[3] = (color.0[3] as f32*(*value as f32)/255.) as u8;
+                color.0[3] = (color.0[3] as f32 * (*value as f32) / 255.) as u8;
                 let mut pixel = subimg.get_pixel(dx, dy);
                 pixel.blend(&color);
                 subimg.put_pixel(dx, dy, pixel);

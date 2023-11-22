@@ -1,17 +1,19 @@
-use std::{fmt::Display, path::Path};
-use super::{rasterisable::Rasterisable, collision_map::CollisionMap};
-use image::{RgbaImage, DynamicImage, open};
+use super::{collision_map::CollisionMap, rasterisable::Rasterisable};
+use image::{open, DynamicImage, RgbaImage};
 use log::{info, warn};
+use std::{fmt::Display, path::Path};
 
 #[derive(Clone)]
 pub enum Token {
     Text(String),
-    Img(DynamicImage)
+    Img(DynamicImage),
 }
 
 impl Token {
     pub fn from<P>(path: P) -> Self
-    where P: AsRef<Path> {
+    where
+        P: AsRef<Path>,
+    {
         Self::Img(open(&path).unwrap())
     }
 }
@@ -20,9 +22,7 @@ impl Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Token::Text(text) => write!(f, "{}", text),
-            Token::Img(_img) => write!(
-                f, "Image"
-            ),
+            Token::Img(_img) => write!(f, "Image"),
         }
     }
 }
@@ -36,7 +36,10 @@ impl WorldCloud {
     pub fn new(dim: (usize, usize)) -> Self {
         let collision_map = CollisionMap::new(dim.0, dim.1);
         let image = RgbaImage::new(dim.0 as u32, dim.1 as u32);
-        Self { collision_map, image }
+        Self {
+            collision_map,
+            image,
+        }
     }
 
     pub fn add(&mut self, token: Box<dyn Rasterisable>) -> bool {
@@ -45,7 +48,7 @@ impl WorldCloud {
                 token.draw(&mut self.image, pos);
                 info!(target: "wordcloud", "Placed `{}` at {:?}", token, pos);
                 true
-            },
+            }
             Err(err) => {
                 warn!(target: "wordcloud", "{:?}", err);
                 false

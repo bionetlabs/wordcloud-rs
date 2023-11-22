@@ -1,27 +1,26 @@
-mod wordcloud;
 mod builder;
-mod hxbitmap;
-mod util;
-mod colors;
-mod indexed_chars;
 mod collision_map;
-mod text;
+mod colors;
+mod hxbitmap;
 mod image;
+mod indexed_chars;
 mod rasterisable;
 mod ring_reader;
-pub use wordcloud::Token;
+mod text;
+mod util;
+mod wordcloud;
 pub use builder::Builder as WordCloud;
 pub use colors::ColorScheme as Colors;
-
+pub use wordcloud::Token;
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-    use std::fs;
     use super::*;
+    use env_logger;
     use lazy_static::lazy_static;
     use regex::Regex;
-    use env_logger;
+    use std::collections::HashMap;
+    use std::fs;
 
     lazy_static! {
         static ref RE_TOKEN: Regex = Regex::new(r"\w+").unwrap();
@@ -32,7 +31,10 @@ mod tests {
         for token in RE_TOKEN.find_iter(&text) {
             *counts.entry(token.as_str().to_string()).or_default() += 1;
         }
-        counts.into_iter().map(|(k, v)| (Token::Text(k), v as f32)).collect()
+        counts
+            .into_iter()
+            .map(|(k, v)| (Token::Text(k), v as f32))
+            .collect()
     }
 
     #[test]

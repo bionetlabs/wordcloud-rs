@@ -1,6 +1,9 @@
-use palette::{rgb::{Rgb, Rgba}, Lcha, FromColor, ShiftHue};
 use image::Rgba as IRgba;
-use rand::{distributions::{Uniform, }, seq::SliceRandom, rngs::ThreadRng, prelude::Distribution};
+use palette::{
+    rgb::{Rgb, Rgba},
+    FromColor, Lcha, ShiftHue,
+};
+use rand::{distributions::Uniform, prelude::Distribution, rngs::ThreadRng, seq::SliceRandom};
 use rand_distr::Normal;
 
 pub trait ColorGen<C = IRgba<u8>> {
@@ -9,17 +12,17 @@ pub trait ColorGen<C = IRgba<u8>> {
 
 pub fn palette2image(color: Rgba) -> IRgba<u8> {
     IRgba([
-        (color.red*255.) as u8,
-        (color.green*255.) as u8,
-        (color.blue*255.) as u8,
-        (color.alpha*255.) as u8,
+        (color.red * 255.) as u8,
+        (color.green * 255.) as u8,
+        (color.blue * 255.) as u8,
+        (color.alpha * 255.) as u8,
     ])
 }
 
 pub enum ColorScheme {
-    Rainbow {luminance: f32, chroma: f32},
-    BiaisedRainbow {anchor: Rgb, variance: f32},
-    DoubleSplitCompl {anchor: Rgb},
+    Rainbow { luminance: f32, chroma: f32 },
+    BiaisedRainbow { anchor: Rgb, variance: f32 },
+    DoubleSplitCompl { anchor: Rgb },
 }
 
 pub struct ClustUniformColors {
@@ -55,29 +58,29 @@ impl ColorGen for GaussianColors {
 impl From<ColorScheme> for Box<dyn ColorGen> {
     fn from(cs: ColorScheme) -> Self {
         match cs {
-            ColorScheme::Rainbow {luminance, chroma} => Box::new(ClustUniformColors {
+            ColorScheme::Rainbow { luminance, chroma } => Box::new(ClustUniformColors {
                 anchor: Lcha::new(luminance, chroma, 0., 1.),
                 hues: vec![0],
                 h_noise: Uniform::from(-180.0..180.),
-                rng: rand::thread_rng()
+                rng: rand::thread_rng(),
             }),
-            ColorScheme::BiaisedRainbow {anchor, variance} => {
+            ColorScheme::BiaisedRainbow { anchor, variance } => {
                 let mut anchor = Lcha::from_color(anchor);
                 anchor.chroma = anchor.chroma.max(30.);
                 Box::new(GaussianColors {
                     anchor,
                     normal: Normal::new(0., variance).unwrap(),
-                    rng: rand::thread_rng()
+                    rng: rand::thread_rng(),
                 })
             }
-            ColorScheme::DoubleSplitCompl {anchor} => {
+            ColorScheme::DoubleSplitCompl { anchor } => {
                 let mut anchor = Lcha::from_color(anchor);
                 anchor.chroma = anchor.chroma.max(30.);
                 Box::new(ClustUniformColors {
                     anchor,
-                    hues: vec![-15, 0, 15, 180-15, 180+15],
+                    hues: vec![-15, 0, 15, 180 - 15, 180 + 15],
                     h_noise: Uniform::from(-2.0..2.),
-                    rng: rand::thread_rng()
+                    rng: rand::thread_rng(),
                 })
             }
         }

@@ -14,7 +14,7 @@ impl<E: Eq> Palette<E> for Vec<E> {
 
 pub struct IndexedChars {
     pub indexes: Vec<usize>,
-    pub chars: Vec<char>
+    pub chars: Vec<char>,
 }
 
 impl IndexedChars {
